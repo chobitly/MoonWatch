@@ -7,6 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@drawable/watch_preview" />
+
     <ImageView
         android:id="@+id/imageView_Moon"
         android:layout_width="match_parent"
@@ -30,5 +31,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@drawable/watch_hour" />
+
+    <ImageView
+        android:id="@+id/imageView_Month"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/month_10"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/imageView_Day"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/date_31"
+        android:visibility="gone" />
 
 </RelativeLayout>

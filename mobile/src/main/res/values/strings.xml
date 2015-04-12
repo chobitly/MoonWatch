@@ -2,5 +2,9 @@
 <resources>
 
     <string name="app_name">Moon Watch Pro</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="configure">Configure</string>
+    <string name="show_date">Show Date</string>
+    <string name="add_widget">Add widget</string>
 
 </resources>

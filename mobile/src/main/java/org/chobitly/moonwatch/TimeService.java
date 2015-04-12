@@ -17,31 +17,25 @@ import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
-import android.widget.RemoteViews;
 
 import com.tencent.android.tpush.XGPushConfig;
 import com.tencent.android.tpush.XGPushManager;
 
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.EService;
-import org.androidannotations.annotations.Trace;
 import org.androidannotations.annotations.UiThread;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.util.EntityUtils;
-import org.chobitly.utils.MoonRotateUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.Date;
 
 @EService
 public class TimeService extends Service {
@@ -76,7 +70,8 @@ public class TimeService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i("service", "--service started--");
-        updateUI(new Date(System.currentTimeMillis())); // 开始服务前先刷新一次UI
+        // 开始服务前先刷新一次UI
+        updateAllWidget();
         return START_STICKY;
     }
 
@@ -88,6 +83,7 @@ public class TimeService extends Service {
 
         unregisterReceiver(broadcastReceiver);
         super.onDestroy();
+        instance = null;
     }
 
     // 用于监听系统时间变化Intent.ACTION_TIME_TICK的BroadcastReceiver，此BroadcastReceiver须为动态注册
@@ -95,42 +91,22 @@ public class TimeService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.i("time received", "--receive--");
-            Date date = new Date(System.currentTimeMillis());
-            updateUI(date);
+            updateAllWidget();
         }
     };
 
-    // 根据当前时间设置小部件
-    //月相周期为2551443s，即2551443s转180度，850481s转60度，212620.25s转15度，42524.05s（11h48m44.05s）转3度
-    //每小时update一次，计算是否需要转3度
-    @Trace
-    private void updateUI(Date date) {
-        // Construct the RemoteViews object
-        RemoteViews views = new RemoteViews(getPackageName(), R.layout.moon_watch_widget);
-//        //获取Moon图片当前的旋转角度并在此基础上再转一点
-//        views.setImageViewBitmap(R.id.imageView_Moon,
-//                MoonRotateUtil.getRotateImage(this, R.drawable.watch_inner_moon, MoonRotateUtil.getDegree()));
-        // 获取时间并控制指针
-
-        Log.i("updateAppWidget", date.toString());
-        views.setImageViewBitmap(R.id.imageView_Minute,
-                MoonRotateUtil.getRotateImage(this, R.drawable.watch_minute,
-                        date.getMinutes() * 6f));
-        views.setImageViewBitmap(R.id.imageView_Hour,
-                MoonRotateUtil.getRotateImage(this, R.drawable.watch_hour,
-                        date.getHours() * 30f + date.getMinutes() * 0.5f));
+    // 根据当前月相、日期和时间设置小部件
+    void updateAllWidget() {
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
-        // 调用AppWidgetManager将remoteViews添加到ComponentName中
-        appWidgetManager.updateAppWidget(new ComponentName(this, MoonWatchWidget.class), views);// 将AppWidgetProvider子类实例包装成ComponentName对象
-        appWidgetManager.updateAppWidget(new ComponentName(this, MoonWatchMiniWidget.class), views);// 将AppWidgetProvider子类实例包装成ComponentName对象
-        appWidgetManager.updateAppWidget(new ComponentName(this, MoonWatchLargeWidget.class), views);// 将AppWidgetProvider子类实例包装成ComponentName对象
-        appWidgetManager.updateAppWidget(new ComponentName(this, MoonWatchExtraWidget.class), views);// 将AppWidgetProvider子类实例包装成ComponentName对象
+        MoonWatchWidget.updateAllWidget(this, appWidgetManager, appWidgetManager.getAppWidgetIds(new ComponentName(this, MoonWatchWidget.class)));
+        MoonWatchWidget.updateAllWidget(this, appWidgetManager, appWidgetManager.getAppWidgetIds(new ComponentName(this, MoonWatchMiniWidget.class)));
+        MoonWatchWidget.updateAllWidget(this, appWidgetManager, appWidgetManager.getAppWidgetIds(new ComponentName(this, MoonWatchLargeWidget.class)));
+        MoonWatchWidget.updateAllWidget(this, appWidgetManager, appWidgetManager.getAppWidgetIds(new ComponentName(this, MoonWatchExtraWidget.class)));
     }
 
     /**
      * 检查更新
      */
-    @Trace
     @Background
     public void checkUpdate() {
         Log.i("check update", "start");
@@ -172,15 +148,7 @@ public class TimeService extends Service {
                     }
                 }
             }
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
+        } catch (IOException | JSONException | PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
     }
