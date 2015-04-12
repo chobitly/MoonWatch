@@ -1,9 +1,9 @@
 # MoonWatch
 一名程序媛纪念童年之作，《美少女战士》中卫哥的月相表。
 
-下载地址 http://fir.im/moonwatch
+下载地址 http://fir.im/moonwatchpro
 
-![dowload from fir.im](https://raw.githubusercontent.com/chobitly/MoonWatch/master/QR_fir.im_mini.png)
+![dowload from fir.im](https://raw.githubusercontent.com/chobitly/MoonWatch/master/QR_fir.im.png)
 
 
 在线客服请戳 https://guest.talk.ai/rooms/2d3158405w
